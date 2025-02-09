@@ -12,6 +12,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "api": "file:",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -23,7 +24,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.20.0",
-    "eslint": "^9.20.0",
     "globals": "^15.14.0",
     "nodemon": "^3.1.9"
   }

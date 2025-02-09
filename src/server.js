@@ -1,25 +1,29 @@
-import express, { json } from "express";
-import { connect } from "mongoose";
+import express from "express";
+import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
-import dotenv from "dotenv";
 import connectDB from "./config/db.js";
+import authRoutes from "./routes/authRoutes.js";
+
+// Load environment variables
 dotenv.config();
+
+// Connect to MongoDB
+connectDB();
 
 const app = express();
 
-app.use(json()); // Parse JSON request bodies
-app.use(cors({ origin: "http://localhost:3000", credentials: true })); // Enable CORS for frontend
-app.use(cookieParser()); // To handle cookies
-app.use(morgan("dev")); // Logs requests for debugging
-// Connect to MongoDB
-connectDB();
-// Basic Route
-app.get("/", (req, res) => {
-  res.send("Welcome to the Social App Backend!");
-});
+// Middleware
+app.use(express.json());
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(cookieParser());
+app.use(morgan("dev"));
 
-// Start Server
+// Routes
+app.use("/api/auth", authRoutes);
+
+app.get("/", (req, res) => res.send("API is running 🚀"));
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
