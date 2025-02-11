@@ -1,10 +1,11 @@
+import { format } from "morgan";
 import Post from "../models/Post.js";
 
 // 🟢 Create a new post
 export const createPost = async (req, res) => {
   try {
-    const { title, description, image } = req.body;
-    const newPost = new Post({ title, description, image, user: req.user._id });
+    const { title, quote } = req.body;
+    const newPost = new Post({ title, quote, user: req.user._id });
     await newPost.save();
     res.status(201).json(newPost);
   } catch (error) {
@@ -16,7 +17,15 @@ export const createPost = async (req, res) => {
 export const getAllPosts = async (req, res) => {
   try {
     const posts = await Post.find().populate("user", "name email"); // Populate user data
-    res.status(200).json(posts);
+
+    // Map over posts and rename 'user' key to 'author'
+    const formattedPosts = posts.map((post) => ({
+      ...post.toObject(), // Convert Mongoose document to plain object
+      author: post.user, // Rename 'user' to 'author'
+    }));
+    formattedPosts.forEach((post) => delete post.user); 
+
+    res.status(200).json(formattedPosts);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -25,27 +34,46 @@ export const getAllPosts = async (req, res) => {
 // 🟠 Update a post
 export const updatePost = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
-    if (!post || post.user.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "Not authorized to update this post" });
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const post = await Post.findById(id);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
     }
-    const updatedPost = await Post.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(updatedPost);
+
+    if (post.user.toString() !== userId) {
+      return res.status(403).json({ message: "Unauthorized to update this post" });
+    }
+
+    // Proceed with update
+    const updatedPost = await Post.findByIdAndUpdate(id, req.body, { new: true });
+    res.status(200).json(updatedPost);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
 // 🔴 Delete a post
 export const deletePost = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
-    if (!post || post.user.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "Not authorized to delete this post" });
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const post = await Post.findById(id);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
     }
-    await post.remove();
-    res.json({ message: "Post deleted successfully" });
+
+    // Check if the logged-in user is the owner of the post
+    if (post.user.toString() !== userId) {
+      return res.status(403).json({ message: "Unauthorized to delete this post" });
+    }
+
+    await Post.findByIdAndDelete(id);
+    res.status(200).json({ message: "Post deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Server error" });
   }
 };
+
