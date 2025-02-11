@@ -1,4 +1,3 @@
-import { format } from "morgan";
 import Post from "../models/Post.js";
 
 // 🟢 Create a new post
