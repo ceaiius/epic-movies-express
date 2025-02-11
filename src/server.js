@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
-
+import postRoutes from "./routes/postRoutes.js";
 // Load environment variables
 dotenv.config();
 
@@ -22,6 +22,8 @@ app.use(morgan("dev"));
 
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/posts", postRoutes);
+
 
 app.get("/", (req, res) => res.send("API is running 🚀"));
 
