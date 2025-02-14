@@ -8,6 +8,10 @@ import passport from "./config/passport.js"; // Import passport config
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
+import profileRoutes from "./routes/profileRoutes.js";
+import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
 // Load environment variables
 dotenv.config();
@@ -36,9 +40,17 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Get __dirname equivalent in ES module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+app.use(express.static('public'));
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/profile", profileRoutes);
 
 app.get("/", (req, res) => res.send("API is running 🚀"));
 
