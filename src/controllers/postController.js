@@ -15,14 +15,21 @@ export const createPost = async (req, res) => {
 // 🔵 Get all posts
 export const getAllPosts = async (req, res) => {
   try {
-    const posts = await Post.find().populate("user", "name email"); // Populate user data
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 5; // Default to 5 posts per page
 
-    // Map over posts and rename 'user' key to 'author'
+    const skip = (page - 1) * limit; // Calculate the number of posts to skip
+
+    const posts = await Post.find()
+      .populate("user", "name email") // Populate user data
+      .skip(skip)
+      .limit(limit);
+    
     const formattedPosts = posts.map((post) => ({
-      ...post.toObject(), // Convert Mongoose document to plain object
-      author: post.user, // Rename 'user' to 'author'
+      ...post.toObject(),
+      author: post.user
     }));
-    formattedPosts.forEach((post) => delete post.user); 
+    formattedPosts.forEach((post) => delete post.user);
 
     res.status(200).json(formattedPosts);
   } catch (error) {
