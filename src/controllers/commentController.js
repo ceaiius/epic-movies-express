@@ -1,4 +1,5 @@
 import Comment from "../models/Comment.js";
+import Notification from "../models/Notification.js";
 import Post from "../models/Post.js";
 
 // Create a comment
@@ -16,6 +17,14 @@ export const createComment = async (req, res) => {
       await comment.save();
 
       const populatedComment = await Comment.findById(comment._id).populate("author", "name avatar");
+
+      if (post.user._id.toString() !== author) {
+        const notification = new Notification({
+          user: post.user._id,
+          message: `${req.user.name} commented on your post: "${text}"`,
+        });
+        await notification.save();
+      }
   
       res.status(201).json(populatedComment); 
     } catch (error) {
