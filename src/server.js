@@ -72,14 +72,20 @@ app.get("/", (req, res) => res.send("API is running 🚀"));
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
 
+  socket.on("joinUserRoom", (userId) => {
+    socket.join(userId);
+    console.log(`User ${userId} joined their room`);
+  });
+
   socket.on("newComment", (comment) => {
     io.emit("newComment", comment);
   });
-
+  
   socket.on("disconnect", () => {
     console.log("A user disconnected:", socket.id);
   });
 });
+
 
 const PORT = process.env.PORT || 5000;
 

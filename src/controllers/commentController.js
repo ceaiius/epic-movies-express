@@ -5,36 +5,43 @@ import { io } from "../server.js";
 
 // Create a comment
 export const createComment = async (req, res) => {
-    try {
-      const { postId, text } = req.body;
-      const author = req.user.id;
-  
-      const post = await Post.findById(postId);
-      if (!post) {
-        return res.status(404).json({ message: "Post not found" });
-      }
-  
-      const comment = new Comment({ post: postId, author, text });
-      await comment.save();
+  try {
+    const { postId, text } = req.body;
+    const author = req.user.id;
 
-      const populatedComment = await Comment.findById(comment._id).populate("author", "name avatar");
-
-      if (post.user._id.toString() !== author) {
-        const notification = new Notification({
-          user: post.user._id,
-          message: `${req.user.name} commented on your post: "${text}"`,
-        });
-        await notification.save();
-      }
-
-      io.emit("newComment", populatedComment);
-  
-      res.status(201).json(populatedComment); 
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Server error" });
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
     }
+
+    const comment = new Comment({ post: postId, author, text });
+    await comment.save();
+
+    const populatedComment = await Comment.findById(comment._id).populate("author", "name avatar");
+
+    // If the comment author is not the post author, create a notification
+    if (post.user._id.toString() !== author) {
+      const notification = new Notification({
+        user: post.user._id,
+        message: `${req.user.name} commented on your post: "${text}"`,
+      });
+      await notification.save();
+
+      // Emit a newNotification event to the post author
+      io.to(post.user.toString()).emit("newNotification", {
+        count: 1, // Increment the notification count by 1
+        notification, // Send the new notification object
+      });
+    }
+
+    io.emit("newComment", populatedComment);
+
+    res.status(201).json(populatedComment);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
   }
+};
 
 // Get comments for a post
 export const getCommentsByPost = async (req, res) => {
