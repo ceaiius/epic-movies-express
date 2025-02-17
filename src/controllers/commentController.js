@@ -1,6 +1,7 @@
 import Comment from "../models/Comment.js";
 import Notification from "../models/Notification.js";
 import Post from "../models/Post.js";
+import { io } from "../server.js";
 
 // Create a comment
 export const createComment = async (req, res) => {
@@ -25,13 +26,15 @@ export const createComment = async (req, res) => {
         });
         await notification.save();
       }
+
+      io.emit("newComment", populatedComment);
   
       res.status(201).json(populatedComment); 
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Server error" });
     }
-  };
+  }
 
 // Get comments for a post
 export const getCommentsByPost = async (req, res) => {
@@ -66,6 +69,8 @@ export const deleteComment = async (req, res) => {
     }
 
     await Comment.findByIdAndDelete(id);
+    io.emit("commentDeleted", id);
+
     res.status(200).json({ message: "Comment deleted successfully" });
   } catch (error) {
     console.error(error);
@@ -88,6 +93,7 @@ export const updateComment = async (req, res) => {
       }
   
       const updatedComment = await Comment.findByIdAndUpdate(id, req.body, { new: true });
+      io.emit("commentUpdated", updatedComment);
       res.status(200).json(updatedComment);
     } catch (error) {
       console.error(error);
