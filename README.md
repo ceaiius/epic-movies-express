@@ -17,14 +17,14 @@ By doing so, they send realtime notifications to the authors of the post to noti
 
 ## Prerequisites
 
-* <img src="./assets/node.png" width="35" style="position: relative; top: 4px" /> *Node@18.18.0 and up*
-* <img src="./assets/mongo.png" width="35" style="position: relative; top: 4px" /> *mongoDB@8.0.30 and up*
+* <img src="readme/assets/node.png" width="35" style="position: relative; top: 4px" /> *Node@18.18.0 and up*
+* <img src="readme/assets/mongo.png" width="35" style="position: relative; top: 4px" /> *mongoDB@8.0.30 and up*
 
 #
 
 ## Tech stack
-* <img src="./assets/express.png" width="35" style="position: relative; top: 4px" /> - back-end framework
-* <img src="./assets/socket.png" width="35" style="position: relative; top: 4px" /> - realtime notifications
+* <img src="readme/assets/express.png" width="35" style="position: relative; top: 4px" /> - back-end framework
+* <img src="readme/assets/socket.png" width="35" style="position: relative; top: 4px" /> - realtime notifications
 
 #
 
